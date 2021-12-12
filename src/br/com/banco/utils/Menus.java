@@ -56,7 +56,7 @@ public class Menus {
         int opcao = 0;
         do {
             System.out.println("--------------------------------------------");
-            System.out.println("Escolha o tipo de conta desejada:");
+            System.out.println("Escolha o tipo de conta que deseja criar:");
             System.out.println("[ 1 ] - Conta corrente");
             System.out.println("[ 2 ] - Conta poupança");
             System.out.println("[ 3 ] - Conta investimento");
@@ -106,7 +106,7 @@ public class Menus {
             System.out.println("[ 4 ] - Extrato bancário");
             System.out.println("[ 5 ] - Transferência");
             System.out.println("[ 6 ] - Alterar dados cadastrais");
-            if (conta instanceof ContaPoupanca) {
+            if (conta instanceof ContaPoupanca || conta instanceof ContaInvestimento) {
                 System.out.println("[ 7 ] - Simulação de rendimento");
             }
             System.out.println("[ 9 ] - Voltar");
@@ -147,6 +147,8 @@ public class Menus {
                     case 7:
                         if (conta instanceof ContaPoupanca) {
                             Menus.menuContaPoupanca((ContaPoupanca) conta);
+                        } else if (conta instanceof ContaInvestimento) {
+                            ContaInvestimento.menuRendimento();
                         } else {
                             System.out.println("Opção inválida!");
                         }
@@ -287,6 +289,7 @@ public class Menus {
             } while (!confirmacaoTransferencia.equals("S") && !confirmacaoTransferencia.equals("N"));
             if (confirmacaoTransferencia.equals("S") && !conta.equals(contaDestino)) {
                 conta.transferir(contaDestino, valorTransferencia);
+                System.out.println("Transferência realizada com sucesso.");
             } else {
                 System.out.println("Transferência cancelada.");
             }
@@ -299,11 +302,13 @@ public class Menus {
         int opcao = 0;
 
         do {
+            System.out.println("--------------------------------------------------");
             System.out.println("Qual relatório deseja gerar");
             System.out.println("[ 1 ] - Listar todas as contas");
             System.out.println("[ 2 ] - Contas com saldo negativo");
             System.out.println("[ 3 ] - Total investido");
-            System.out.println("[ 4 ] - Transações");
+            System.out.println("[ 4 ] - Transferências entre contas");
+            System.out.println("[ 5 ] - Transações de um cliente específico");
             System.out.println("[ 9 ] - Voltar");
             System.out.print("Opção: ");
             try {
@@ -328,10 +333,15 @@ public class Menus {
                     }
                     break;
                 case 3:
+                    double totalInvestido = 0;
                     if (ContaInvestimento.getListaContasInvestimento().isEmpty()) {
                         System.out.println("Ainda não há contas cadastradas.");
                     } else {
-
+                        Relatorios.listaContaInvestimento();
+                        for (Conta conta: ContaInvestimento.getListaContasInvestimento()) {
+                            totalInvestido += conta.getSaldo();
+                        }
+                        System.out.printf("Total investido: RS%.2f", totalInvestido);
                     }
                     break;
                 case 4:
@@ -343,7 +353,14 @@ public class Menus {
                         }
                     }
                     break;
+                case 5:
+                    Conta conta = Menus.utilizaContaExistente();
+                    if (conta != null) {
+                        conta.imprimeExtrato();
+                    }
+                    break;
                 case 9:
+                    System.out.println("Voltando...");
                     break;
                 default:
                     System.err.println("Opção inválida!");
@@ -359,6 +376,8 @@ public class Menus {
         int opcao = 0;
 
         do {
+            System.out.println("-----------------------------------------");
+            System.out.println("Qual tipo de conta gostaria de listar? ");
             System.out.println("[ 1 ] - Conta Corrente");
             System.out.println("[ 2 ] - Conta Poupança");
             System.out.println("[ 3 ] - Conta Investimento");
@@ -379,7 +398,7 @@ public class Menus {
                     Relatorios.listaContaPoupanca();
                     break;
                 case 3:
-//                    Relatorios.listaContaCorrente();
+                    Relatorios.listaContaInvestimento();
                     break;
                 case 9:
                     System.out.println("Voltando...");

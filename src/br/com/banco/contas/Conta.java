@@ -114,16 +114,16 @@ public abstract class Conta {
             } while (!Cpf.validaCpf(cpf));
 
             System.out.print("Digite a sua renda mensal: ");
-            renda = sc.nextDouble();
+            renda = Double.parseDouble(sc.nextLine().trim());
 
             do {
                 System.out.println("[ 1 ] Florianópolis / [ 2 ] São Jose ");
                 System.out.print("Digite a sua agência: ");
-                agencia = sc.nextInt();
+                agencia = Integer.parseInt(sc.nextLine());
             } while (agencia != 1 && agencia!= 2);
 
             System.out.print("Digite o seu saldo inicial: R$");
-            saldo = sc.nextDouble();
+            saldo = Double.parseDouble(sc.nextLine().trim().replace("." , ","));
 
             Conta conta = null;
 
@@ -135,12 +135,12 @@ public abstract class Conta {
                     break;
                 case 2:
                     conta = new ContaPoupanca(nome, cpf, renda, agencia, saldo);
-                    ContaPoupanca.getListaContasPoupanca().add((ContaPoupanca) conta);
+                    ContaPoupanca.getListaContasPoupanca().add(conta);
                     System.out.println("Conta poupança criada com sucesso!");
                     break;
                 case 3:
                     conta = new ContaInvestimento(nome, cpf, renda, agencia, saldo);
-                    ContaInvestimento.getListaContasInvestimento().add((ContaInvestimento) conta);
+                    ContaInvestimento.getListaContasInvestimento().add(conta);
                     System.out.println("Conta investimento criada com sucesso!");
                     break;
                 default:

@@ -2,6 +2,7 @@ package br.com.banco.utils;
 
 import br.com.banco.contas.Conta;
 import br.com.banco.contas.ContaCorrente;
+import br.com.banco.contas.ContaInvestimento;
 import br.com.banco.contas.ContaPoupanca;
 
 import java.util.ArrayList;
@@ -25,6 +26,17 @@ public class Relatorios {
             System.out.println("Ainda não existem contas nessa categoria.");
         } else {
             for (Conta conta: ContaPoupanca.getListaContasPoupanca()) {
+                System.out.println(conta);
+            }
+        }
+    }
+
+    public static void listaContaInvestimento() {
+
+        if (ContaInvestimento.getListaContasInvestimento().isEmpty()) {
+            System.out.println("Ainda não existem contas nessa categoria.");
+        } else {
+            for (Conta conta: ContaInvestimento.getListaContasInvestimento()) {
                 System.out.println(conta);
             }
         }

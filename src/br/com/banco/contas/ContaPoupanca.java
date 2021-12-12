@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ContaPoupanca extends Conta{
 
-    private static List<ContaPoupanca> listaContasPoupanca = new ArrayList<>();
+    private static List<Conta> listaContasPoupanca = new ArrayList<>();
 
     public ContaPoupanca(String nome, String cpf, double renda, int agencia, double saldo) {
         super(nome, cpf, renda, agencia, saldo);
@@ -37,7 +37,7 @@ public class ContaPoupanca extends Conta{
                 , getSaldo(), rentabilidadePoupanca, meses, saldoFinal);
     }
 
-    public static List<ContaPoupanca> getListaContasPoupanca() {
+    public static List<Conta> getListaContasPoupanca() {
         return listaContasPoupanca;
     }
 }
