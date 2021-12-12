@@ -1,9 +1,6 @@
 package br.com.banco.utils;
 
-import br.com.banco.contas.Conta;
-import br.com.banco.contas.ContaCorrente;
-import br.com.banco.contas.ContaInvestimento;
-import br.com.banco.contas.ContaPoupanca;
+import br.com.banco.contas.*;
 import br.com.banco.controllers.MainController;
 
 import java.awt.*;
@@ -15,11 +12,11 @@ public class Menus {
 
     public static void exibeMenuInicial() {
         System.out.println("----------------------------------------");
-        System.out.println("[ 1 ] - Cadastrar uma nova conta.");
-        System.out.println("[ 2 ] - Listar contas.");
-        System.out.println("[ 3 ] - Utilizar conta existente.");
-        System.out.println("[ 4 ] - Gerar Relatório.");
-        System.out.println("[ 9 ] - Sair do sistema.");
+        System.out.println("[ 1 ] - Cadastrar uma nova conta");
+        System.out.println("[ 2 ] - Listar contas");
+        System.out.println("[ 3 ] - Utilizar conta existente");
+        System.out.println("[ 4 ] - Gerar Relatório");
+        System.out.println("[ 9 ] - Sair do sistema");
         System.out.print("Digite o número correspondente à operação: ");
 
     }
@@ -42,6 +39,7 @@ public class Menus {
                 menuConta(utilizaContaExistente());
                 break;
             case 4:
+                Menus.menuRelatorio();
                 break;
             case 9:
                 System.out.println("\nEncerrando sistema...");
@@ -69,12 +67,11 @@ public class Menus {
             } catch (Exception e){
                 e.getMessage();
             }
-
             switch (opcao) {
                 case 1:
                 case 2:
                 case 3:
-                    Conta conta = MainController.criaConta(opcao);
+                    Conta conta = Conta.criaConta(opcao);
                     if(conta != null) {
                         Menus.menuConta(conta);
                     }
@@ -84,6 +81,7 @@ public class Menus {
                     break;
                 default:
                     System.err.println("Opção inválida!");
+                    break;
             }
 
         } while(opcao != 9);
@@ -91,13 +89,15 @@ public class Menus {
 
     private static void menuConta(Conta conta) {
 
+        if (conta == null) {
+            return;
+        }
+
         Scanner sc = new Scanner(System.in);
         int opcao = 0;
         double quantia = 0;
 
         do {
-            System.out.println("--------------------------------");
-            System.out.printf("Número da conta: Conta %d  /  Titular: %s  /  Saldo: %.2f", conta.getConta(), conta.getNome(), conta.getSaldo());
             System.out.println("--------------------------------");
             System.out.println("Operações Disponíveis:");
             System.out.println("[ 1 ] - Sacar");
@@ -131,17 +131,18 @@ public class Menus {
                         System.out.println(conta.verificaSaldo());
                         break;
                     case 4:
-                        System.out.println(conta.getExtrato());
+                        conta.imprimeExtrato();
+                        conta.verificaSaldo();
                         break;
                     case 5:
                         if (Conta.getContas().size() < 2) {
                             System.out.println("Ainda não existem contas suficiente para efetuar uma transferência.");
                         } else {
-                            menuTransferencia();
+                            menuTransferencia(conta);
                         }
                         break;
                     case 6:
-                        conta.alteraDados();
+                        Menus.menuAlteraConta(conta);
                         break;
                     case 7:
                         if (conta instanceof ContaPoupanca) {
@@ -170,7 +171,7 @@ public class Menus {
         int opcao = 0;
 
         do {
-            System.out.println("-----------------------------------");
+            System.out.println(conta);
             System.out.println("Qual dado você gostaria de alterar?");
             System.out.println("[ 1 ] - Nome");
             System.out.println("[ 2 ] - Renda");
@@ -187,9 +188,12 @@ public class Menus {
                     System.out.println("Nome alterado com sucesso!");
                     break;
                 case 2:
-                    System.out.println("Renda: ");
+                    System.out.print("Renda: ");
                     double renda = Double.parseDouble(sc.nextLine());
                     conta.setRenda(renda);
+//                    if (conta instanceof ContaCorrente) {
+//                        ((ContaCorrente) conta).setChequeEspecial(conta.getSaldo());
+//                    }
                     System.out.println("Renda alterada com sucesso!");
                     break;
                 case 3:
@@ -200,6 +204,7 @@ public class Menus {
                         agencia = Integer.parseInt(sc.nextLine());
                     } while (agencia != 1 && agencia !=2);
                     conta.setAgencia(agencia);
+                    System.out.println("Agência alterada com sucesso!");
                     break;
                 case 9:
                     System.out.println("Voltando...");
@@ -224,7 +229,7 @@ public class Menus {
             System.out.print("Período de tempo (em meses): ");
             meses = Integer.parseInt(sc.nextLine());
 
-            System.out.println("Rentabilidade anual (%): ");
+            System.out.print("Rentabilidade anual (%): ");
             rentabilidadeAnual = Double.parseDouble(sc.nextLine());
 
             contaPoupanca.calculaRentabilidade(meses, rentabilidadeAnual);
@@ -247,7 +252,7 @@ public class Menus {
                 System.out.println(conta);
             }
 
-            System.out.println("Digite o número da conta: ");
+            System.out.print("Digite o número da conta: ");
             try {
                 idconta = Integer.parseInt(scanner.nextLine());
                 contaSelecionada = Conta.getContas().get(idconta - 1);
@@ -258,20 +263,133 @@ public class Menus {
         }
     }
 
-    public static void menuTransferencia() {
+    public static void menuTransferencia(Conta conta) {
 
         Scanner scanner = new Scanner(System.in);
+        Conta contaDestino;
         double valorTransferencia;
+        String confirmacaoTransferencia;
 
         System.out.print("Quanto você quer transferir? ");
-        valorTransferencia = Double.parseDouble(scanner.nextLine());
+        valorTransferencia = Double.parseDouble(scanner.nextLine().trim().replace(",", "."));
 
+        System.out.println("Para qual conta deseja transferir?");
+
+        contaDestino = utilizaContaExistente();
+
+        if (contaDestino == null) {
+            System.out.println("Erro ao selecionar conta");
+        } else {
+            System.out.printf("Transferir RS%.2f para %s, Conta %d?\n", valorTransferencia, contaDestino.getNome(), contaDestino.getConta());
+            do {
+                System.out.print("[ S ] / [ N ] : ");
+                confirmacaoTransferencia = scanner.nextLine().trim().toUpperCase();
+            } while (!confirmacaoTransferencia.equals("S") && !confirmacaoTransferencia.equals("N"));
+            if (confirmacaoTransferencia.equals("S") && !conta.equals(contaDestino)) {
+                conta.transferir(contaDestino, valorTransferencia);
+            } else {
+                System.out.println("Transferência cancelada.");
+            }
+        }
     }
 
     public static void menuRelatorio() {
 
         Scanner scanner = new Scanner(System.in);
-        int opcao;
+        int opcao = 0;
+
+        do {
+            System.out.println("Qual relatório deseja gerar");
+            System.out.println("[ 1 ] - Listar todas as contas");
+            System.out.println("[ 2 ] - Contas com saldo negativo");
+            System.out.println("[ 3 ] - Total investido");
+            System.out.println("[ 4 ] - Transações");
+            System.out.println("[ 9 ] - Voltar");
+            System.out.print("Opção: ");
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+            } catch (Exception e) {
+                e.getMessage();
+            }
+
+            switch (opcao) {
+                case 1:
+                    if (Conta.getContas().isEmpty()) {
+                        System.out.println("Ainda não há contas cadastradas");
+                    } else {
+                        menuListarContas();
+                    }
+                    break;
+                case 2:
+                    if (ContaCorrente.getContasCorrentes().isEmpty()) {
+                        System.out.println("Ainda não há contas cadastradas");
+                    } else {
+                        Relatorios.listaContasComSaldoNegativo();
+                    }
+                    break;
+                case 3:
+                    if (ContaInvestimento.getListaContasInvestimento().isEmpty()) {
+                        System.out.println("Ainda não há contas cadastradas.");
+                    } else {
+
+                    }
+                    break;
+                case 4:
+                    if (Transacao.getTransacoes().isEmpty()) {
+                        System.out.println("Nenhuma transação foi efetuada.");
+                    } else {
+                        for (Transacao transacao: Transacao.getTransacoes()) {
+                            System.out.println(transacao);
+                        }
+                    }
+                    break;
+                case 9:
+                    break;
+                default:
+                    System.err.println("Opção inválida!");
+                    break;
+            }
+        } while (opcao != 9);
+
+    }
+
+    public static void menuListarContas() {
+
+        Scanner scanner = new Scanner(System.in);
+        int opcao = 0;
+
+        do {
+            System.out.println("[ 1 ] - Conta Corrente");
+            System.out.println("[ 2 ] - Conta Poupança");
+            System.out.println("[ 3 ] - Conta Investimento");
+            System.out.println("[ 9 ] - Voltar");
+            System.out.print("Qual tipo de conta você quer listar? ");
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+            }catch (Exception e) {
+                e.getMessage();
+            }
+
+            switch (opcao) {
+                case 1:
+                    Relatorios.listaContaCorrente();
+                    break;
+                case 2:
+                    Relatorios.listaContaPoupanca();
+                    break;
+                case 3:
+//                    Relatorios.listaContaCorrente();
+                    break;
+                case 9:
+                    System.out.println("Voltando...");
+                    break;
+                default:
+                    System.err.println("Opção inválida!");
+                    break;
+            }
+
+        } while (opcao != 9);
 
     }
 }

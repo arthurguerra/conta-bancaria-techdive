@@ -44,7 +44,8 @@ public abstract class Conta {
         if (valorSaque <= this.saldo) {
             this.saldo -= valorSaque;
             Transacao transacao = new Transacao(TipoTransacao.SAQUE, this, null, valorSaque);
-            getExtrato().add(transacao);
+            adicionaTransacao(transacao);
+//            extrato.add(transacao);
             return true;
         } else {
             System.out.println("Saldo insuficiente!");
@@ -56,41 +57,40 @@ public abstract class Conta {
 
         this.saldo += valorDeposito;
         Transacao transacao = new Transacao(TipoTransacao.DEPOSITO, null, this, valorDeposito);
-        getExtrato().add(transacao);
+        adicionaTransacao(transacao);
+//        this.extrato.add(transacao);
     }
 
     public String verificaSaldo() {
-        return "Olá, " + this.nome + "! Seu saldo atual é: R$"+this.saldo;
+        return String.format("Olá, %s! Seu saldo atual é de: RS%.2f", this.nome, this.saldo);
     }
 
-/*    public void imprimeExtrato() {
-
-        List<Transacao> extratoCompleto = getExtrato();
-
-        for (Transacao transacao: Transacao.getTransacoes()) {
-            if (transacao.getTipo() == TipoTransacao.TRANSFERENCIA && transacao.) {
-
+    public void imprimeExtrato() {
+        if (extrato.isEmpty()) {
+            System.out.println("Ainda não há transações registradas.");
+        } else {
+            for (Transacao transacao: extrato) {
+                System.out.println(transacao);
             }
         }
-    }*/
+    }
 
     public boolean transferir(Conta contaDestino, double valorTransferencia) {
         if (valorTransferencia <= this.saldo) {
             this.saldo -= valorTransferencia;
             contaDestino.saldo += valorTransferencia;
             Transacao transacao = new Transacao(TipoTransacao.TRANSFERENCIA,this, contaDestino, valorTransferencia);
-            this.getExtrato().add(transacao);
-            contaDestino.getExtrato().add(transacao);
+
+            adicionaTransacao(transacao);
+            contaDestino.adicionaTransacao(transacao);
+            Transacao.getTransacoes().add(transacao);
+
+            System.out.println("Transferência realizada com sucesso!");
             return true;
         } else {
-            System.out.println("Saldo insuficiente para efetuar a transferência!\nSaldo atual: R$"+this.saldo);
+            System.out.println("Saldo insuficiente para efetuar a transferência!");
             return false;
         }
-    }
-
-    public void alteraDados() {
-        System.out.println(this);
-        Menus.menuAlteraConta(this);
     }
 
     public static Conta criaConta(int opcaoTipoDeConta) {
@@ -117,8 +117,8 @@ public abstract class Conta {
             renda = sc.nextDouble();
 
             do {
+                System.out.println("[ 1 ] Florianópolis / [ 2 ] São Jose ");
                 System.out.print("Digite a sua agência: ");
-                System.out.println("[ 1 ] Florianópolis / [ 2 ] São Jose");
                 agencia = sc.nextInt();
             } while (agencia != 1 && agencia!= 2);
 
@@ -136,9 +136,12 @@ public abstract class Conta {
                 case 2:
                     conta = new ContaPoupanca(nome, cpf, renda, agencia, saldo);
                     ContaPoupanca.getListaContasPoupanca().add((ContaPoupanca) conta);
-                    System.out.println("Conta poupança criada com sucesso");
+                    System.out.println("Conta poupança criada com sucesso!");
                     break;
                 case 3:
+                    conta = new ContaInvestimento(nome, cpf, renda, agencia, saldo);
+                    ContaInvestimento.getListaContasInvestimento().add((ContaInvestimento) conta);
+                    System.out.println("Conta investimento criada com sucesso!");
                     break;
                 default:
                     return null;
@@ -150,6 +153,10 @@ public abstract class Conta {
             System.err.println("Erro ao cadastrar conta. Tente novamente!");
         }
         return null;
+    }
+
+    public void adicionaTransacao(Transacao transacao) {
+        extrato.add(transacao);
     }
 
     public static ArrayList<Conta> getContas() {
@@ -190,8 +197,8 @@ public abstract class Conta {
 
     @Override
     public String toString() {
-        System.out.println("---------------------------");
-        return String.format("Conta %d\nCPF: %s\nRenda: %.2f\nAgência: %d - %s", conta, cpf, renda, agencia, agencia == 1 ? "Florianópolis" : "São José");
+        return String.format("\nNome: %s\nConta: %d\nCPF: %s\nRenda: %.2f\nAgência: %d - %s\nSaldo: %.2f\n"
+                , nome, conta, cpf, renda, agencia, agencia == 1 ? "Florianópolis" : "São José", saldo);
 
 //        return "---------------------------\nConta{" +
 //        System.out.println("nome => '" + nome + '\'' +

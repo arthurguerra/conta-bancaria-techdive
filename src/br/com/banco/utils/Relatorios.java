@@ -4,19 +4,46 @@ import br.com.banco.contas.Conta;
 import br.com.banco.contas.ContaCorrente;
 import br.com.banco.contas.ContaPoupanca;
 
+import java.util.ArrayList;
+
 public class Relatorios {
 
     public static void listaContaCorrente() {
-        System.out.println(ContaCorrente.getContasCorrentes());
+
+        if (ContaCorrente.getContasCorrentes().isEmpty()) {
+            System.out.println("Ainda não existem contas nessa categoria.");
+        } else {
+            for (Conta conta: ContaCorrente.getContasCorrentes()) {
+                System.out.println(conta);
+            }
+        }
     }
 
     public static void listaContaPoupanca() {
-        System.out.println(ContaPoupanca.getListaContasPoupanca());
+
+        if (ContaPoupanca.getListaContasPoupanca().isEmpty()) {
+            System.out.println("Ainda não existem contas nessa categoria.");
+        } else {
+            for (Conta conta: ContaPoupanca.getListaContasPoupanca()) {
+                System.out.println(conta);
+            }
+        }
     }
 
     public static void listaContasComSaldoNegativo() {
-        for (Conta conta: Conta.getContas()) {
+
+        ArrayList<Conta> contasSaldoNegativo = new ArrayList<>();
+
+        for (Conta conta: ContaCorrente.getContasCorrentes()) {
             if (conta.getSaldo() < 0) {
+                contasSaldoNegativo.add(conta);
+            }
+        }
+
+        if (contasSaldoNegativo.isEmpty()) {
+            System.out.println("Não há contas com saldo negativo!");
+        } else {
+            for (Conta conta: contasSaldoNegativo) {
                 System.out.println(conta);
             }
         }
