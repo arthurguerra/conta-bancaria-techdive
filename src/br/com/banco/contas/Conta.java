@@ -117,7 +117,7 @@ public abstract class Conta {
             renda = Double.parseDouble(sc.nextLine().trim());
 
             do {
-                System.out.println("[ 1 ] Florianópolis / [ 2 ] São Jose ");
+                System.out.println("[ 1 ] Florianópolis\n[ 2 ] São Jose ");
                 System.out.print("Digite a sua agência: ");
                 agencia = Integer.parseInt(sc.nextLine());
             } while (agencia != 1 && agencia!= 2);
